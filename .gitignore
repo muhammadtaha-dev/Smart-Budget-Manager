@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Data files (don't upload saved user data)
+budget_data.json
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
