@@ -1,35 +1,21 @@
-# Smart Budget Manager 💰
+Smart Budget Manager 💰
 
-A monthly expense tracking system with Flask backend and responsive UI.
+Live Demo
+[Click here to use the Smart Budget Manager](https://muhammadtaha-dev.github.io/Smart-Budget-Manager/)
 
-## Features
-- ✅ Save user profile (name, age, monthly budget)
-- ✅ Add/delete expenses with category, item, amount
-- ✅ Real-time dashboard with progress bar
-- ✅ Budget health status (Under control / Near limit / Exceeded)
-- ✅ Responsive design for mobile, tablet, desktop
-- ✅ Data persistence with JSON file storage
+Features
+Save user profile (name, age, monthly budget)
+Add/delete expenses with category, item, amount
+Real-time dashboard with progress bar
+Budget health status (Under control / Near limit / Exceeded)
+Responsive design for mobile, tablet, desktop
 
-## Tech Stack
-- **Backend**: Flask (Python)
-- **Frontend**: HTML5, TailwindCSS, JavaScript
-- **Icons**: Lucide Icons
+Tech Stack
+- Backend: Flask (Python) - Hosted on Render
+- Frontend: HTML5, TailwindCSS, JavaScript - Hosted on GitHub Pages
+- Icons: Lucide Icons
 
-## Installation
-
-### Prerequisites
-- Python 3.8+
-- pip
-
-### Setup
-
-1. Clone the repository
-2. Install dependencies: `pip install flask flask-cors`
-3. Run the backend: `python app.py`
-4. Open `index.html` with Live Server
-
-## API Endpoints
-
+API Endpoints
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | /api/profile | Save user profile |
@@ -39,5 +25,5 @@ A monthly expense tracking system with Flask backend and responsive UI.
 | DELETE | /api/expenses/{index} | Delete expense |
 | DELETE | /api/expenses/clear | Clear all expenses |
 
-## License
-MIT
+Live Demo
+https://muhammadtaha-dev.github.io/Smart-Budget-Manager/
