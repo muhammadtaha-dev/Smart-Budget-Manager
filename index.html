@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="en" class="h-full w-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Smart Budget Manager</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive typography using clamp */
+h1 {
+  font-size: clamp(1.75rem, 6vw, 2.5rem) !important;
+  line-height: 1.2 !important;
+  word-break: break-word;
+}
+
+h2 {
+  font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
+  word-break: break-word;
+}
+
+p, label, input, select, button, span, .text-sm, .text-xs {
+  word-break: break-word;
+}
+
+/* Number containers - prevent overflow */
+.number-card, .stat-card, [class*="rounded-3xl"] p:last-child {
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Make all text containers responsive */
+.overflow-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* For very small screens, allow wrapping */
+@media (max-width: 480px) {
+  .stat-card p:last-child {
+    font-size: 1rem !important;
+    white-space: normal;
+    word-break: break-all;
+  }
+  
+  .grid-cols-2, .grid-cols-3 {
+    gap: 0.5rem !important;
+  }
+  
+  .min-w-[130px] {
+    min-width: auto !important;
+  }
+}
+
+/* Ensure numbers wrap properly */
+.font-extrabold.text-2xl, .font-extrabold.text-3xl, .text-xl {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  font-size: clamp(1rem, 4vw, 1.5rem) !important;
+}
+
+/* Progress bar responsive */
+.progress-track {
+  height: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+/* Expense row responsive */
+.expense-row {
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .expense-row {
+    flex-direction: row;
+  }
+}
+
+/* Grid layout responsive */
+.hero-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .hero-layout {
+    grid-template-columns: 1.05fr 1.95fr;
+  }
+}
+
+/* Dashboard cards responsive */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Bottom stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Expense amount text */
+.expense-amount {
+  font-size: clamp(0.9rem, 3vw, 1.25rem);
+  word-break: break-word;
+}
+
+/* Fix for overflowing numbers */
+.break-all {
+  word-break: break-all;
+}
+
+.break-word {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Make inputs and selects responsive */
+input, select, button {
+  font-size: 16px !important; /* Prevents zoom on iOS */
+  max-width: 100%;
+}
+
+/* ===== FIX FOR DROPDOWN VISIBILITY ===== */
+select {
+  background-color: #1f2a44 !important;
+  color: #f8fafc !important;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+/* Style the dropdown list items */
+select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  padding: 12px !important;
+}
+
+/* Hover state for options - THIS FIXES YOUR ISSUE */
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #14b8a6 !important;
+  color: #08111f !important;
+}
+
+/* Selected option styling */
+select option:checked {
+  background-color: #14b8a6 !important;
+  color: #08111f !important;
+}
+
+/* For Chrome/Edge/Safari dropdown menu */
+select:focus {
+  outline: none;
+}
+
+select:focus-visible {
+  outline: 3px solid rgba(245, 158, 11, 0.7);
+  outline-offset: 3px;
+}
+
+/* Firefox specific fix */
+@-moz-document url-prefix() {
+  select option {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+  }
+  select option:hover {
+    background-color: #14b8a6 !important;
+    color: #08111f !important;
+  }
+}
+
+/* Remove default white background when select is clicked */
+select:-webkit-any(select) {
+  background-color: #1f2a44;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 10px;
+}
+
+/* Existing animations */
+.app-shell {
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.65;
+  pointer-events: none;
+  animation: floatOrb 9s ease-in-out infinite;
+}
+
+.orb-one {
+  width: 260px;
+  height: 260px;
+  left: 7%;
+  top: 8%;
+  animation-delay: 0s;
+}
+
+.orb-two {
+  width: 190px;
+  height: 190px;
+  right: 8%;
+  top: 18%;
+  animation-delay: 1.4s;
+}
+
+.orb-three {
+  width: 230px;
+  height: 230px;
+  right: 18%;
+  bottom: 7%;
+  animation-delay: 2.2s;
+}
+
+@keyframes floatOrb {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(18px, -22px, 40px) scale(1.06); }
+}
+
+.grid-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(circle at center, black, transparent 72%);
+}
+
+.glass-panel {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transform-style: preserve-3d;
+  animation: riseIn 850ms ease both;
+}
+
+.tilt-card {
+  transform: perspective(1100px) rotateX(0deg) rotateY(0deg) translateZ(0);
+  transition: transform 350ms ease, box-shadow 350ms ease;
+}
+
+@media (hover: hover) {
+  .tilt-card:hover {
+    transform: perspective(1100px) rotateX(4deg) rotateY(-5deg) translateY(-4px);
+  }
+}
+
+.cash-stack {
+  position: relative;
+  width: 100px;
+  height: 80px;
+  transform-style: preserve-3d;
+  animation: moneyFloat 4.8s ease-in-out infinite;
+}
+
+@media (min-width: 640px) {
+  .cash-stack {
+    width: 138px;
+    height: 108px;
+  }
+}
+
+.cash-note {
+  position: absolute;
+  width: 80px;
+  height: 45px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.38);
+  box-shadow: 0 22px 45px rgba(0,0,0,0.22);
+  transform-style: preserve-3d;
+}
+
+@media (min-width: 640px) {
+  .cash-note {
+    width: 118px;
+    height: 66px;
+    border-radius: 18px;
+  }
+}
+
+.cash-note:nth-child(1) { transform: rotateZ(-10deg) translate3d(0, 16px, 8px); }
+.cash-note:nth-child(2) { transform: rotateZ(4deg) translate3d(8px, 8px, 24px); }
+.cash-note:nth-child(3) { transform: rotateZ(-2deg) translate3d(14px, 0, 42px); }
+
+@media (min-width: 640px) {
+  .cash-note:nth-child(1) { transform: rotateZ(-10deg) translate3d(0, 26px, 8px); }
+  .cash-note:nth-child(2) { transform: rotateZ(4deg) translate3d(12px, 12px, 24px); }
+  .cash-note:nth-child(3) { transform: rotateZ(-2deg) translate3d(22px, 0, 42px); }
+}
+
+.coin {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  right: -6px;
+  bottom: 6px;
+  box-shadow: inset -6px -6px 12px rgba(0,0,0,0.18), 0 15px 24px rgba(0,0,0,0.25);
+  animation: spinCoin 3.2s linear infinite;
+}
+
+@media (min-width: 640px) {
+  .coin {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@keyframes moneyFloat {
+  0%, 100% { transform: translateY(0) rotateX(8deg) rotateY(-10deg); }
+  50% { transform: translateY(-13px) rotateX(13deg) rotateY(7deg); }
+}
+
+@keyframes spinCoin {
+  0% { transform: rotateY(0deg) rotateZ(0deg); }
+  100% { transform: rotateY(360deg) rotateZ(360deg); }
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.stagger-1 { animation-delay: 100ms; }
+.stagger-2 { animation-delay: 180ms; }
+.stagger-3 { animation-delay: 260ms; }
+.stagger-4 { animation-delay: 340ms; }
+
+.progress-track {
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 650ms cubic-bezier(.2,.8,.2,1), background 350ms ease;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  animation: shimmer 2.4s linear infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.toast {
+  transform: translateY(-16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 260ms ease;
+  z-index: 100;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.focus-ring:focus {
+  outline: 3px solid rgba(245, 158, 11, 0.7);
+  outline-offset: 3px;
+}
+
+.expense-row {
+  animation: rowIn 320ms ease both;
+  flex-wrap: wrap;
+}
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.confirm-actions {
+  display: none;
+}
+
+.expense-row.confirming .normal-actions {
+  display: none;
+}
+
+.expense-row.confirming .confirm-actions {
+  display: flex;
+}
+
+@media (max-width: 640px) {
+  .expense-row > div {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
+</head>
+
+<body class="h-full w-full">
+<div id="appShell" class="app-shell h-full w-full bg-[#08111f] text-[#f8fafc]">
+<div class="grid-glow"></div>
+<div class="orb orb-one bg-[#14b8a6]"></div>
+<div class="orb orb-two bg-[#f59e0b]"></div>
+<div class="orb orb-three bg-[#1f2a44]"></div>
+
+<!-- HEADER -->
+<header class="relative z-10 px-4 sm:px-6 md:px-8 pt-5 sm:pt-7 pb-3">
+<div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+<div>
+  <div class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 border border-white/15 bg-white/8 shadow-xl">
+    <i data-lucide="sparkles" class="w-3 h-3 sm:w-4 sm:h-4"></i>
+    <span id="appSubtitle" class="text-xs sm:text-sm font-medium">Track spending with confidence</span>
+  </div>
+  <h1 id="appTitle" class="mt-3 sm:mt-4 font-extrabold tracking-tight leading-tight">Smart Budget Manager</h1>
+</div>
+<div class="flex items-center gap-3 rounded-3xl border border-white/15 bg-white/10 px-4 py-3 sm:px-5 sm:py-4 shadow-2xl">
+  <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center bg-[#14b8a6] text-[#08111f]">
+    <i data-lucide="wallet" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+  </div>
+  <div>
+    <p class="text-[10px] sm:text-xs opacity-75">Budget Health</p>
+    <p id="topStatus" class="font-bold text-sm sm:text-base">Set your budget</p>
+  </div>
+</div>
+</div>
+</header>
+
+<!-- MAIN -->
+<main class="relative z-10 px-4 sm:px-6 md:px-8 pb-6 sm:pb-8">
+<div class="max-w-7xl mx-auto grid hero-layout gap-4 sm:gap-6">
+
+<!-- LEFT COLUMN -->
+<aside class="space-y-4 sm:space-y-6">
+
+<!-- PROFILE SECTION -->
+<section class="glass-panel stagger-1 tilt-card rounded-2xl sm:rounded-[2rem] border border-white/15 bg-[#1f2a44]/70 shadow-2xl p-4 sm:p-6">
+<div class="flex items-start justify-between gap-3 sm:gap-4 flex-wrap">
+<div class="flex-1">
+  <h2 class="font-bold text-lg sm:text-xl">Budget Profile</h2>
+  <p class="mt-0.5 sm:mt-1 opacity-75 text-xs sm:text-sm">Enter your monthly plan.</p>
+</div>
+<div class="cash-stack scale-75 sm:scale-100 origin-top-right" aria-hidden="true">
+  <div class="cash-note bg-[#14b8a6]"></div>
+  <div class="cash-note bg-[#f59e0b]"></div>
+  <div class="cash-note bg-[#f8fafc]"></div>
+  <div class="coin bg-[#f59e0b]"></div>
+</div>
+</div>
+
+<form id="profileForm" class="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+<div>
+  <label class="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2">Name</label>
+  <input id="nameInput" type="text" required placeholder="Enter your name" class="focus-ring w-full rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 sm:px-4 sm:py-3 text-white placeholder-white/45 text-sm sm:text-base">
+</div>
+<div>
+  <label class="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2">Age</label>
+  <input id="ageInput" type="number" min="1" max="120" required placeholder="Enter your age" class="focus-ring w-full rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 sm:px-4 sm:py-3 text-white placeholder-white/45 text-sm sm:text-base">
+</div>
+<div>
+  <label class="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2">Total Monthly Budget</label>
+  <input id="budgetInput" type="number" min="1" step="0.01" required placeholder="Example: 2500" class="focus-ring w-full rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 sm:px-4 sm:py-3 text-white placeholder-white/45 text-sm sm:text-base">
+</div>
+<button id="saveProfileBtn" type="submit" class="focus-ring w-full rounded-xl sm:rounded-2xl bg-[#f59e0b] text-[#08111f] font-extrabold px-4 py-2.5 sm:px-5 sm:py-3 shadow-xl transition text-sm sm:text-base">Save Profile</button>
+</form>
+</section>
+
+<!-- EXPENSE SECTION -->
+<section class="glass-panel stagger-2 tilt-card rounded-2xl sm:rounded-[2rem] border border-white/15 bg-[#1f2a44]/70 shadow-2xl p-4 sm:p-6">
+<div class="flex items-center gap-2 sm:gap-3">
+<div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#14b8a6] text-[#08111f] flex items-center justify-center">
+  <i data-lucide="plus" class="w-4 h-4 sm:w-6 sm:h-6"></i>
+</div>
+<div>
+  <h2 class="font-bold text-lg sm:text-xl">Add Expense</h2>
+  <p class="opacity-75 text-xs sm:text-sm">Log category, item, and amount.</p>
+</div>
+</div>
+
+<form id="expenseForm" class="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+<div>
+  <label class="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2">Category</label>
+  <select id="categoryInput" required class="focus-ring w-full rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 sm:px-4 sm:py-3 text-white text-sm sm:text-base" style="background-color: #1f2a44 !important;">
+    <option value="" disabled selected>Choose category</option>
+    <option value="Food">🍔 Food</option>
+    <option value="Transport">🚗 Transport</option>
+    <option value="Shopping">🛍️ Shopping</option>
+    <option value="Bills">📄 Bills</option>
+    <option value="Entertainment">🎬 Entertainment</option>
+    <option value="Other">📌 Other</option>
+  </select>
+</div>
+<div>
+  <label class="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2">Item</label>
+  <input id="itemInput" type="text" required placeholder="Example: Groceries" class="focus-ring w-full rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 sm:px-4 sm:py-3 text-white placeholder-white/45 text-sm sm:text-base">
+</div>
+<div>
+  <label class="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2">Amount</label>
+  <input id="amountInput" type="number" min="0.01" step="0.01" required placeholder="Example: 45.50" class="focus-ring w-full rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 sm:px-4 sm:py-3 text-white placeholder-white/45 text-sm sm:text-base">
+</div>
+<button id="addExpenseBtn" type="submit" class="focus-ring w-full rounded-xl sm:rounded-2xl bg-[#14b8a6] text-[#08111f] font-extrabold px-4 py-2.5 sm:px-5 sm:py-3 shadow-xl transition text-sm sm:text-base">Add Expense</button>
+</form>
+</section>
+
+</aside>
+
+<!-- RIGHT COLUMN -->
+<section class="space-y-4 sm:space-y-6">
+
+<!-- DASHBOARD -->
+<div class="glass-panel stagger-3 rounded-2xl sm:rounded-[2rem] border border-white/15 bg-[#1f2a44]/70 shadow-2xl p-4 sm:p-6 md:p-7">
+<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+<div>
+  <h2 class="font-bold text-lg sm:text-xl">Monthly Overview</h2>
+  <p class="mt-0.5 sm:mt-1 opacity-75 text-xs sm:text-sm">Real-time budget status based on your expenses.</p>
+</div>
+<div class="dashboard-stats w-full lg:w-auto">
+  <div class="rounded-2xl sm:rounded-3xl border border-white/15 bg-white/10 p-3 sm:p-4">
+    <p class="text-[10px] sm:text-xs opacity-70">Budget</p>
+    <p id="budgetValue" class="font-extrabold mt-1 text-base sm:text-xl md:text-2xl break-all">$0.00</p>
+  </div>
+  <div class="rounded-2xl sm:rounded-3xl border border-white/15 bg-white/10 p-3 sm:p-4">
+    <p class="text-[10px] sm:text-xs opacity-70">Spent</p>
+    <p id="spentValue" class="font-extrabold mt-1 text-base sm:text-xl md:text-2xl break-all">$0.00</p>
+  </div>
+  <div class="rounded-2xl sm:rounded-3xl border border-white/15 bg-white/10 p-3 sm:p-4">
+    <p class="text-[10px] sm:text-xs opacity-70">Remaining</p>
+    <p id="remainingValue" class="font-extrabold mt-1 text-base sm:text-xl md:text-2xl break-all">$0.00</p>
+  </div>
+</div>
+</div>
+
+<div class="mt-4 sm:mt-6 md:mt-7">
+<div class="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
+  <p id="statusText" class="font-bold text-xs sm:text-sm">Budget is waiting for your profile.</p>
+  <p id="percentText" class="font-extrabold text-sm sm:text-base">0%</p>
+</div>
+<div class="progress-track h-3 sm:h-4 md:h-5 rounded-full bg-white/10 border border-white/15">
+  <div id="progressFill" class="progress-fill rounded-full bg-[#14b8a6]"></div>
+</div>
+</div>
+
+<div class="stats-grid mt-4 sm:mt-6 md:mt-7">
+<div class="rounded-2xl sm:rounded-3xl bg-white/10 border border-white/15 p-3 sm:p-4 md:p-5">
+  <div class="flex items-center justify-between">
+    <p class="font-bold text-xs sm:text-sm">Expenses</p>
+    <i data-lucide="receipt-text" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+  </div>
+  <p id="expenseCount" class="mt-2 sm:mt-3 text-xl sm:text-2xl md:text-3xl font-extrabold">0</p>
+</div>
+<div class="rounded-2xl sm:rounded-3xl bg-white/10 border border-white/15 p-3 sm:p-4 md:p-5">
+  <div class="flex items-center justify-between">
+    <p class="font-bold text-xs sm:text-sm">Month</p>
+    <i data-lucide="calendar-days" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+  </div>
+  <p id="monthValue" class="mt-2 sm:mt-3 text-xl sm:text-2xl md:text-3xl font-extrabold">—</p>
+</div>
+<div class="rounded-2xl sm:rounded-3xl bg-white/10 border border-white/15 p-3 sm:p-4 md:p-5">
+  <div class="flex items-center justify-between">
+    <p class="font-bold text-xs sm:text-sm">Top Category</p>
+    <i data-lucide="pie-chart" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+  </div>
+  <p id="topCategory" class="mt-2 sm:mt-3 text-sm sm:text-lg md:text-xl font-extrabold break-words">—</p>
+</div>
+</div>
+</div>
+
+<!-- EXPENSES LIST -->
+<div class="glass-panel stagger-4 rounded-2xl sm:rounded-[2rem] border border-white/15 bg-[#1f2a44]/70 shadow-2xl p-4 sm:p-6 md:p-7">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-5">
+<div>
+  <h2 class="font-bold text-lg sm:text-xl">Expenses</h2>
+  <p id="emptyStateText" class="opacity-75 text-xs sm:text-sm">No expenses yet</p>
+</div>
+<button id="clearAllBtn" class="focus-ring rounded-xl sm:rounded-2xl border border-white/20 bg-white/10 px-3 py-2 sm:px-4 sm:py-3 font-bold text-xs sm:text-sm transition disabled:opacity-40">Clear Expenses</button>
+</div>
+<div id="expenseList" class="space-y-2 sm:space-y-3"></div>
+</div>
+
+</section>
+</div>
+</main>
+
+<footer class="relative z-10 px-4 sm:px-6 md:px-8 pb-4 sm:pb-6">
+<div class="max-w-7xl mx-auto text-center opacity-70">
+<p class="text-xs sm:text-sm">Designed for smarter monthly money decisions</p>
+</div>
+</footer>
+
+<div id="toast" class="toast fixed top-5 left-1/2 -translate-x-1/2 z-50 rounded-xl sm:rounded-2xl border border-white/20 bg-[#1f2a44] text-[#f8fafc] px-3 py-2 sm:px-5 sm:py-3 shadow-2xl font-bold text-xs sm:text-sm whitespace-nowrap sm:whitespace-normal">Saved</div>
+</div>
+
+<script>
+// ============================================
+// BACKEND API CONNECTION
+// ============================================
+const API_BASE_URL = 'http://127.0.0.1:5000/api';
+
+// Global state
+let currentUser = null;
+let expenses = [];
+let isProcessing = false;
+
+// DOM Elements
+const elements = {
+  nameInput: document.getElementById('nameInput'),
+  ageInput: document.getElementById('ageInput'),
+  budgetInput: document.getElementById('budgetInput'),
+  saveProfileBtn: document.getElementById('saveProfileBtn'),
+  categoryInput: document.getElementById('categoryInput'),
+  itemInput: document.getElementById('itemInput'),
+  amountInput: document.getElementById('amountInput'),
+  addExpenseBtn: document.getElementById('addExpenseBtn'),
+  clearAllBtn: document.getElementById('clearAllBtn'),
+  expenseList: document.getElementById('expenseList'),
+  budgetValue: document.getElementById('budgetValue'),
+  spentValue: document.getElementById('spentValue'),
+  remainingValue: document.getElementById('remainingValue'),
+  topStatus: document.getElementById('topStatus'),
+  statusText: document.getElementById('statusText'),
+  percentText: document.getElementById('percentText'),
+  progressFill: document.getElementById('progressFill'),
+  expenseCount: document.getElementById('expenseCount'),
+  monthValue: document.getElementById('monthValue'),
+  topCategory: document.getElementById('topCategory'),
+  emptyStateText: document.getElementById('emptyStateText'),
+  toast: document.getElementById('toast')
+};
+
+// Helper Functions
+function showToast(message, isError = false) {
+  elements.toast.textContent = message;
+  elements.toast.style.background = isError ? '#dc2626' : '#1f2a44';
+  elements.toast.classList.add('show');
+  setTimeout(() => {
+    elements.toast.classList.remove('show');
+    elements.toast.style.background = '#1f2a44';
+  }, 2200);
+}
+
+function formatMoney(amount) {
+  return new Intl.NumberFormat('en-US', { 
+    style: 'currency', 
+    currency: 'USD',
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2
+  }).format(amount);
+}
+
+function getCurrentMonth() {
+  return new Date().toLocaleString('en-US', { month: 'long' });
+}
+
+// Calculate dashboard stats
+function calculateStats() {
+  const totalBudget = currentUser ? currentUser["Total Budget"] : 0;
+  const totalSpent = expenses.reduce((sum, exp) => sum + exp.Amount, 0);
+  const remaining = totalBudget - totalSpent;
+  const percent = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+
+  // Find top category
+  const categoryTotals = {};
+  expenses.forEach(exp => {
+    const cat = exp.Category;
+    categoryTotals[cat] = (categoryTotals[cat] || 0) + exp.Amount;
+  });
+  let topCat = "—";
+  let maxAmount = 0;
+  Object.keys(categoryTotals).forEach(cat => {
+    if (categoryTotals[cat] > maxAmount) {
+      maxAmount = categoryTotals[cat];
+      topCat = cat;
+    }
+  });
+
+  return { totalBudget, totalSpent, remaining, percent, topCategory: topCat };
+}
+
+// Update Dashboard UI
+function updateDashboard() {
+  const stats = calculateStats();
+
+  elements.budgetValue.textContent = formatMoney(stats.totalBudget);
+  elements.spentValue.textContent = formatMoney(stats.totalSpent);
+  elements.remainingValue.textContent = formatMoney(stats.remaining);
+  elements.expenseCount.textContent = expenses.length;
+  elements.monthValue.textContent = expenses.length ? getCurrentMonth().slice(0, 3) : "—";
+  elements.topCategory.textContent = stats.topCategory;
+  elements.percentText.textContent = `${Math.round(Math.min(stats.percent, 100))}%`;
+  elements.progressFill.style.width = `${Math.min(stats.percent, 100)}%`;
+
+  if (!currentUser) {
+    elements.statusText.textContent = "Budget is waiting for your profile.";
+    elements.topStatus.textContent = "Set your budget";
+    elements.progressFill.style.background = "#14b8a6";
+  } else if (stats.totalSpent > stats.totalBudget) {
+    elements.statusText.textContent = "Danger! Budget exceeded.";
+    elements.topStatus.textContent = "Budget exceeded";
+    elements.progressFill.style.background = "#ef4444";
+  } else if (stats.totalSpent >= stats.totalBudget * 0.8) {
+    elements.statusText.textContent = "Warning! Near budget limit.";
+    elements.topStatus.textContent = "Near limit";
+    elements.progressFill.style.background = "#f59e0b";
+  } else {
+    elements.statusText.textContent = "Budget is under control!";
+    elements.topStatus.textContent = "Under control";
+    elements.progressFill.style.background = "#14b8a6";
+  }
+
+  elements.clearAllBtn.disabled = expenses.length === 0 || isProcessing;
+  elements.emptyStateText.style.display = expenses.length ? "none" : "block";
+}
+
+// Render expenses list
+function renderExpensesList() {
+  if (!elements.expenseList) return;
+
+  if (expenses.length === 0) {
+    elements.expenseList.innerHTML = `
+      <div class="text-center py-6 sm:py-8 text-white/50">
+        <i data-lucide="inbox" class="mx-auto mb-2 w-8 h-8 sm:w-12 sm:h-12"></i>
+        <p class="text-sm sm:text-base">No expenses added yet</p>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  elements.expenseList.innerHTML = expenses.map((exp, index) => `
+    <div class="expense-row rounded-2xl sm:rounded-3xl border border-white/15 bg-white/10 p-3 sm:p-4 flex flex-wrap md:flex-nowrap md:items-center md:justify-between gap-3" data-idx="${index}">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
+        <div class="expense-icon w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 bg-[#14b8a6] text-[#08111f]">
+          <i data-lucide="receipt" class="w-4 h-4 sm:w-6 sm:h-6"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-extrabold truncate text-sm sm:text-base">${escapeHtml(exp.Item)}</h3>
+          <p class="opacity-75 text-xs sm:text-sm">${escapeHtml(exp.Category)} • ${exp.Month} ${exp.Year}</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between md:justify-end gap-3">
+        <p class="font-extrabold text-base sm:text-xl text-[#f59e0b] break-all">${formatMoney(exp.Amount)}</p>
+        <div class="normal-actions">
+          <button onclick="deleteExpenseByIndex(${index})" class="focus-ring rounded-xl sm:rounded-2xl border border-white/20 bg-white/10 px-2 py-1.5 sm:px-3 sm:py-2 font-bold text-xs sm:text-sm hover:bg-white/15 transition">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+// Load profile from backend
+async function loadProfile() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/profile`);
+    const data = await response.json();
+
+    if (data.success && data.user) {
+      currentUser = data.user;
+      elements.nameInput.value = currentUser.Name || '';
+      elements.ageInput.value = currentUser.Age || '';
+      elements.budgetInput.value = currentUser["Total Budget"] || '';
+      expenses = currentUser.Expenses || [];
+    } else {
+      currentUser = null;
+      expenses = [];
+    }
+    renderExpensesList();
+    updateDashboard();
+  } catch (error) {
+    console.error('Error loading profile:', error);
+  }
+}
+
+// Save profile to backend
+async function saveProfile(e) {
+  e.preventDefault();
+  if (isProcessing) return;
+
+  const name = elements.nameInput.value.trim();
+  const age = parseInt(elements.ageInput.value);
+  const totalBudget = parseFloat(elements.budgetInput.value);
+
+  if (!name || isNaN(age) || isNaN(totalBudget) || totalBudget <= 0) {
+    showToast('Please fill all fields correctly', true);
+    return;
+  }
+
+  isProcessing = true;
+  elements.saveProfileBtn.disabled = true;
+  elements.saveProfileBtn.textContent = 'Saving...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, age, total_budget: totalBudget })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      showToast('Profile saved successfully!');
+      await loadProfile();
+    } else {
+      showToast('Error saving profile', true);
+    }
+  } catch (error) {
+    console.error('Error saving profile:', error);
+    showToast('Error connecting to server', true);
+  }
+
+  isProcessing = false;
+  elements.saveProfileBtn.disabled = false;
+  elements.saveProfileBtn.textContent = 'Save Profile';
+}
+
+// Add expense to backend
+async function addExpense(e) {
+  e.preventDefault();
+  if (isProcessing) return;
+
+  if (!currentUser) {
+    showToast('Please save your profile first', true);
+    return;
+  }
+
+  const category = elements.categoryInput.value;
+  const item = elements.itemInput.value.trim();
+  const amount = parseFloat(elements.amountInput.value);
+
+  if (!category || !item || isNaN(amount) || amount <= 0) {
+    showToast('Please fill all expense fields correctly', true);
+    return;
+  }
+
+  isProcessing = true;
+  elements.addExpenseBtn.disabled = true;
+  elements.addExpenseBtn.textContent = 'Adding...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/expenses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, item, amount })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      showToast('Expense added!');
+      elements.itemInput.value = '';
+      elements.amountInput.value = '';
+      await loadProfile();
+
+      if (data.budget_status && data.budget_status.status === 'danger') {
+        showToast(data.budget_status.message, true);
+      } else if (data.budget_status && data.budget_status.status === 'warning') {
+        showToast(data.budget_status.message);
+      }
+    } else {
+      showToast(data.message || 'Error adding expense', true);
+    }
+  } catch (error) {
+    console.error('Error adding expense:', error);
+    showToast('Error connecting to server', true);
+  }
+
+  isProcessing = false;
+  elements.addExpenseBtn.disabled = false;
+  elements.addExpenseBtn.textContent = 'Add Expense';
+}
+
+// Delete expense by index
+window.deleteExpenseByIndex = async function(index) {
+  if (isProcessing) return;
+  if (index < 0 || index >= expenses.length) return;
+
+  isProcessing = true;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/expenses/${index}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      showToast('Expense deleted');
+      await loadProfile();
+    } else {
+      showToast('Error deleting expense', true);
+    }
+  } catch (error) {
+    console.error('Error deleting expense:', error);
+    showToast('Error connecting to server', true);
+  }
+
+  isProcessing = false;
+};
+
+// Clear all expenses
+async function clearAllExpenses() {
+  if (isProcessing) return;
+  if (expenses.length === 0) return;
+
+  if (!confirm('Are you sure you want to clear ALL expenses?')) return;
+
+  isProcessing = true;
+  elements.clearAllBtn.disabled = true;
+  elements.clearAllBtn.textContent = 'Clearing...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/expenses/clear`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      showToast('All expenses cleared');
+      await loadProfile();
+    } else {
+      showToast('Error clearing expenses', true);
+    }
+  } catch (error) {
+    console.error('Error clearing expenses:', error);
+    showToast('Error connecting to server', true);
+  }
+
+  isProcessing = false;
+  elements.clearAllBtn.disabled = false;
+  elements.clearAllBtn.textContent = 'Clear Expenses';
+}
+
+// Event Listeners
+document.getElementById('profileForm')?.addEventListener('submit', saveProfile);
+document.getElementById('expenseForm')?.addEventListener('submit', addExpense);
+elements.clearAllBtn?.addEventListener('click', clearAllExpenses);
+
+// Initialize Lucide icons
+if (window.lucide) lucide.createIcons();
+
+// Load initial data
+loadProfile();
+
+// Auto-refresh every 5 seconds
+setInterval(loadProfile, 5000);
+</script>
+</body>
+</html>
